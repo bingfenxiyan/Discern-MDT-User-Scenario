@@ -78,15 +78,7 @@ class DislodgeSpeedAbnormal:
 
     def begin(self, data, key, ts="", lon="", lat="", speed=None, verify=None):
         """
-        开始
-        :param data: 数据, DataFrame
-        :param key: 筛选数据用, str
-        :param ts: 时间列, str
-        :param lon: 经度列, str
-        :param lat: 纬度列, str
-        :param speed: 异常速度门限, int
-        :param verify: 验证次数, int
-        :return: data(DataFrame)
+        开始查找速度异常数据
         """
         if verify is None or verify < 1:
             raise ValueError("传入值错误 verify=%s" % verify)
@@ -137,21 +129,9 @@ class DislodgeLocationAbnormal:
 
     def begin(self, data, worker_data, on=None, left_on=None, right_on=None, lon_a="", lat_a="", lon_b="", lat_b="", site=None, scope=None):
         """
-        开始
-        :param data: 数据, DataFrame
-        :param worker_data: 5G站点工参, DataFrame
-        :param on: 连接列
-        :param left_on: 左边连接列
-        :param right_on: 右边连接列
-        :param lon_a: data表经度列
-        :param lat_a: data表纬度列
-        :param lon_b: 工参表经度列
-        :param lat_b: 工参表纬度列
-        :param site: 如果有分站点类型,则为站点类型列
-        :param scope: site=None时5G站点覆盖范围int, 或是 {"class1": scope1, "class2":scope2, ...}
-        :return: data(DataFrame)
+        开始查找定位异常数据
         """
-        if on is not None and left_on is None and right_on is None:
+        if left_on is None and right_on is None:
             left_on, right_on = on, on
         on_list = data[left_on].drop_duplicates().values.tolist()
         storage_dict = {}
@@ -317,7 +297,7 @@ class SceneJudge:
         m = data.shape[0]
         norm_data_set = data - np.tile(min_values, (m, 1))
         norm_data_set = norm_data_set / np.tile(ranges, (m, 1))
-        # 控制最小值不为0
+        # 控制最小值
         norm_data_set[norm_data_set == 0] = 0.01
         return norm_data_set
 
@@ -343,7 +323,7 @@ class SceneJudge:
         return train_data, train_label, train_set, test_data, test_label, test_set
 
     def _get_data(self, data):
-        """交叉验证数据集获取"""
+        """分类数据集获取"""
         # data = transform(data)    # 转为标准数据
         columns = ["intscrsrp", "距站点距离", "速度", "intnc1rsrp", "intnc2rsrp", "intnc3rsrp",
                    "intnc4rsrp", "intnc5rsrp", "intnc6rsrp", "intnc7rsrp", "intnc8rsrp",
